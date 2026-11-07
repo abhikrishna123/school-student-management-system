@@ -19,6 +19,14 @@ let MONGO_URI = process.env.MONGO_URI || '';
 // Parse JSON request bodies
 app.use(express.json());
 
+// In serverless environments (e.g. Vercel), req.url might arrive without the /api prefix.
+app.use((req, _res, next) => {
+  if (process.env.VERCEL && !req.url.startsWith('/api') && req.url !== '/') {
+    req.url = '/api' + (req.url.startsWith('/') ? '' : '/') + req.url;
+  }
+  next();
+});
+
 // ---------------------------------------------------------------------------
 // MONGOOSE SCHEMAS (College Project Standard MERN Architecture)
 // ---------------------------------------------------------------------------
