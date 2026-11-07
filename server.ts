@@ -415,6 +415,10 @@ async function connectToMongo(uri: string) {
     console.log('[MongoDB] ' + mongoErrorMessage);
     return false;
   }
+  if (mongoose.connection.readyState === 1) {
+    isMongoConnected = true;
+    return true;
+  }
   try {
     console.log('[MongoDB] Attempting connection to:', uri.replace(/:([^:@]+)@/, ':****@'));
     await mongoose.connect(uri, {
@@ -447,6 +451,18 @@ async function connectToMongo(uri: string) {
 
 // Initial connection attempt
 connectToMongo(MONGO_URI);
+
+// Ensure DB is connected for serverless invocations (e.g. Vercel)
+app.use(async (_req, _res, next) => {
+  if (MONGO_URI && mongoose.connection.readyState === 0) {
+    try {
+      await connectToMongo(MONGO_URI);
+    } catch {
+      // Continue even if mongo connection fails (in-memory mode)
+    }
+  }
+  next();
+});
 
 // ---------------------------------------------------------------------------
 // REST API ROUTES
@@ -1155,4 +1171,8 @@ async function startServer() {
   });
 }
 
-startServer();
+if (!process.env.VERCEL) {
+  startServer();
+}
+
+export default app;
