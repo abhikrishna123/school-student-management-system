@@ -1129,7 +1129,8 @@ All the best for your internal mark evaluation! 🚀
 // VITE DEV SERVER / STATIC PROD SERVING
 // ---------------------------------------------------------------------------
 async function startServer() {
-  if (process.env.NODE_ENV === 'production') {
+  const isProd = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
+  if (isProd) {
     const distPath = path.join(__dirname, 'dist');
     app.use(express.static(distPath));
     app.get('*', (_req, res) => {
