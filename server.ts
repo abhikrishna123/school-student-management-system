@@ -18,8 +18,25 @@ const currentDirname = typeof __dirname !== 'undefined' ? __dirname : (currentFi
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Standard direct replica set connection string for Atlas cluster (avoids serverless/AWS Lambda TLS alert 80 with SRV)
+const STANDARD_ATLAS_URI = 'mongodb://admin:admin123@ac-n8b4yvq-shard-00-00.ueskciq.mongodb.net:27017,ac-n8b4yvq-shard-00-01.ueskciq.mongodb.net:27017,ac-n8b4yvq-shard-00-02.ueskciq.mongodb.net:27017/school_db?ssl=true&replicaSet=atlas-jgmw0e-shard-0&authSource=admin&retryWrites=true&w=majority';
+
+function normalizeMongoUri(uri: string): string {
+  if (!uri) return STANDARD_ATLAS_URI;
+  if (uri.includes(':****@')) {
+    return STANDARD_ATLAS_URI;
+  }
+  // In serverless environments (Netlify AWS Lambda), mongodb+srv DNS lookups frequently fail TLS handshake (alert 80).
+  // Standard replica set connection strings connect directly with SSL/TLS and work reliably.
+  if (uri.includes('cluster0.ueskciq.mongodb.net')) {
+    return STANDARD_ATLAS_URI;
+  }
+  return uri;
+}
+
 // Use environment variable if set, otherwise fall back to the Atlas cluster
-let MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://admin:admin123@cluster0.ueskciq.mongodb.net/school_db?retryWrites=true&w=majority';
+let MONGO_URI = normalizeMongoUri(process.env.MONGO_URI || STANDARD_ATLAS_URI);
 
 // Parse JSON request bodies
 app.use(express.json());
@@ -424,7 +441,8 @@ function calculateGrade(percentage: number, hasFailedSubject: boolean) {
 // MONGODB CONNECTION SETUP
 // ---------------------------------------------------------------------------
 async function connectToMongo(uri: string) {
-  if (!uri) {
+  const targetUri = normalizeMongoUri(uri);
+  if (!targetUri) {
     isMongoConnected = false;
     mongoErrorMessage = 'No MONGO_URI provided. Running in fast in-memory mode.';
     console.log('[MongoDB] ' + mongoErrorMessage);
@@ -435,14 +453,15 @@ async function connectToMongo(uri: string) {
     return true;
   }
   try {
-    console.log('[MongoDB] Attempting connection to:', uri.replace(/:([^:@]+)@/, ':****@'));
-    await mongoose.connect(uri, {
-      serverSelectionTimeoutMS: 15000,
+    console.log('[MongoDB] Attempting connection to:', targetUri.replace(/:([^:@]+)@/, ':****@'));
+    await mongoose.connect(targetUri, {
+      serverSelectionTimeoutMS: 8000,
       socketTimeoutMS: 45000,
+      tlsAllowInvalidCertificates: true,
     });
     isMongoConnected = true;
     mongoErrorMessage = '';
-    MONGO_URI = uri;
+    MONGO_URI = targetUri;
     console.log('[MongoDB] Successfully connected to MongoDB Database!');
 
     // Seed if empty
@@ -510,9 +529,9 @@ app.get('/api/status', async (_req, res) => {
 
 // 2. Connect or switch MongoDB URI dynamically
 app.post('/api/connect-db', async (req, res) => {
-  const { mongoUri } = req.body;
-  if (!mongoUri) {
-    return res.status(400).json({ success: false, message: 'Please provide a valid MongoDB connection string' });
+  let { mongoUri } = req.body;
+  if (!mongoUri || mongoUri.includes(':****@')) {
+    mongoUri = STANDARD_ATLAS_URI;
   }
 
   try {

@@ -4,7 +4,9 @@ import { connectMongo } from '../api';
 
 export default function DbConnectModal({ isOpen, onClose, dbStatus, onConnected }) {
   const defaultUri = 'mongodb+srv://admin:admin123@cluster0.ueskciq.mongodb.net/school_db?retryWrites=true&w=majority';
-  const [mongoUri, setMongoUri] = useState(dbStatus?.mongoUri || defaultUri);
+  const [mongoUri, setMongoUri] = useState(
+    dbStatus?.mongoUri && !dbStatus.mongoUri.includes('****') ? dbStatus.mongoUri : defaultUri
+  );
   const [connecting, setConnecting] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
