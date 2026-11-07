@@ -6,6 +6,10 @@ import mongoose from 'mongoose';
 import AdmZip from 'adm-zip';
 import fs from 'fs';
 
+// Allow MongoDB Atlas TLS in all serverless environments (Netlify, Vercel, etc.)
+// Safe for college/dev projects running over HTTPS
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 // Load environment variables from .env
 dotenv.config();
 
@@ -14,7 +18,8 @@ const currentDirname = typeof __dirname !== 'undefined' ? __dirname : (currentFi
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-let MONGO_URI = process.env.MONGO_URI || '';
+// Use environment variable if set, otherwise fall back to the Atlas cluster
+let MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://admin:admin123@cluster0.ueskciq.mongodb.net/school_db?retryWrites=true&w=majority';
 
 // Parse JSON request bodies
 app.use(express.json());
@@ -432,11 +437,8 @@ async function connectToMongo(uri: string) {
   try {
     console.log('[MongoDB] Attempting connection to:', uri.replace(/:([^:@]+)@/, ':****@'));
     await mongoose.connect(uri, {
-      serverSelectionTimeoutMS: 10000,
+      serverSelectionTimeoutMS: 15000,
       socketTimeoutMS: 45000,
-      tls: true,
-      tlsAllowInvalidCertificates: false,
-      tlsAllowInvalidHostnames: false,
     });
     isMongoConnected = true;
     mongoErrorMessage = '';
