@@ -1,0 +1,6 @@
+{
+  "name": "School Student Management System",
+  "description": "Full-stack School Student and Internal Mark Management System built with React, Node.js, Express, and MongoDB for college project submission.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

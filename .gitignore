@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Environment variables (Prevents sensitive database credentials from being pushed)
+.env
+.env.local
+.env.*.local
+
+# Production Build output
+dist/
+dist-ssr/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor & OS files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+
