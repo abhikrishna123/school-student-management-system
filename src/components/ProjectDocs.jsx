@@ -69,13 +69,24 @@ export default function ProjectDocs({ dbStatus, onOpenDbModal }) {
           </p>
         </div>
 
-        <a
-          href="/api/download-zip"
-          className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-semibold px-5 py-2.5 rounded-lg shadow-sm transition-all cursor-pointer shrink-0"
-        >
-          <Download className="w-4 h-4" />
-          <span>Download Project ZIP</span>
-        </a>
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
+          <a
+            href="/School_Student_Management_System_Project_Report.pdf"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-lg shadow-sm transition-all cursor-pointer"
+          >
+            <Download className="w-4 h-4" />
+            <span>Project Report PDF</span>
+          </a>
+          <a
+            href="/api/download-zip"
+            className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-lg shadow-sm transition-all cursor-pointer"
+          >
+            <Download className="w-4 h-4" />
+            <span>Download Project ZIP</span>
+          </a>
+        </div>
       </div>
 
       {/* Instructions for Friend Card */}

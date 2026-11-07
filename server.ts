@@ -1093,6 +1093,8 @@ app.get('/api/download-zip', async (_req, res) => {
       '.env.example',
       'server.ts',
       'README.md',
+      'School_Student_Management_System_Project_Report.pdf',
+      'PROJECT_REPORT.html',
     ];
 
     // Add root files
@@ -1173,6 +1175,16 @@ All the best for your internal mark evaluation! 🚀
   } catch (err: any) {
     console.error('[Zip Export Error]', err);
     res.status(500).json({ success: false, message: 'Failed to create zip file: ' + err.message });
+  }
+});
+
+// 9. Download Project Report PDF
+app.get('/api/download-report-pdf', (_req, res) => {
+  const pdfPath = path.join(process.cwd(), 'School_Student_Management_System_Project_Report.pdf');
+  if (fs.existsSync(pdfPath)) {
+    res.download(pdfPath, 'School_Student_Management_System_Project_Report.pdf');
+  } else {
+    res.status(404).json({ success: false, message: 'Project report PDF not found' });
   }
 });
 
