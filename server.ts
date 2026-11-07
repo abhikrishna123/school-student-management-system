@@ -432,7 +432,11 @@ async function connectToMongo(uri: string) {
   try {
     console.log('[MongoDB] Attempting connection to:', uri.replace(/:([^:@]+)@/, ':****@'));
     await mongoose.connect(uri, {
-      serverSelectionTimeoutMS: 4000,
+      serverSelectionTimeoutMS: 10000,
+      socketTimeoutMS: 45000,
+      tls: true,
+      tlsAllowInvalidCertificates: false,
+      tlsAllowInvalidHostnames: false,
     });
     isMongoConnected = true;
     mongoErrorMessage = '';
