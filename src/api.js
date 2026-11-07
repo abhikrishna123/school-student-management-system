@@ -1,12 +1,24 @@
 // Simple API Helper for College Internal Mark Project
-// Uses standard fetch with simple error handling
+// Uses standard fetch with safe error handling
 
 const API_BASE = '/api';
+
+async function safeJson(res) {
+  const text = await res.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    return {
+      success: false,
+      message: `Backend returned non-JSON (${res.status}). Ensure backend is active and MONGO_URI is configured.`,
+    };
+  }
+}
 
 export async function getStatus() {
   try {
     const res = await fetch(`${API_BASE}/status`);
-    return await res.json();
+    return await safeJson(res);
   } catch (error) {
     console.error('Error fetching status:', error);
     return { success: false, connected: false, dbMode: 'Offline' };
@@ -20,7 +32,7 @@ export async function connectMongo(mongoUri) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ mongoUri }),
     });
-    return await res.json();
+    return await safeJson(res);
   } catch (error) {
     console.error('Error connecting to mongo:', error);
     return { success: false, message: error.message };
@@ -30,7 +42,7 @@ export async function connectMongo(mongoUri) {
 export async function getDashboardStats() {
   try {
     const res = await fetch(`${API_BASE}/dashboard/stats`);
-    const data = await res.json();
+    const data = await safeJson(res);
     return data.success ? data.data : null;
   } catch (error) {
     console.error('Error fetching dashboard stats:', error);
@@ -46,7 +58,7 @@ export async function getStudents(params = {}) {
     if (params.section) query.append('section', params.section);
 
     const res = await fetch(`${API_BASE}/students?${query.toString()}`);
-    const data = await res.json();
+    const data = await safeJson(res);
     return data.success ? data.data : [];
   } catch (error) {
     console.error('Error fetching students:', error);
@@ -57,7 +69,7 @@ export async function getStudents(params = {}) {
 export async function getStudentById(id) {
   try {
     const res = await fetch(`${API_BASE}/students/${id}`);
-    const data = await res.json();
+    const data = await safeJson(res);
     return data.success ? data.data : null;
   } catch (error) {
     console.error('Error fetching student:', error);
@@ -72,7 +84,7 @@ export async function createStudent(studentData) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(studentData),
     });
-    return await res.json();
+    return await safeJson(res);
   } catch (error) {
     console.error('Error creating student:', error);
     return { success: false, message: error.message };
@@ -86,7 +98,7 @@ export async function updateStudent(id, studentData) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(studentData),
     });
-    return await res.json();
+    return await safeJson(res);
   } catch (error) {
     console.error('Error updating student:', error);
     return { success: false, message: error.message };
@@ -98,7 +110,7 @@ export async function deleteStudent(id) {
     const res = await fetch(`${API_BASE}/students/${id}`, {
       method: 'DELETE',
     });
-    return await res.json();
+    return await safeJson(res);
   } catch (error) {
     console.error('Error deleting student:', error);
     return { success: false, message: error.message };
@@ -111,7 +123,7 @@ export async function getSubjects(params = {}) {
     if (params.classGrade) query.append('classGrade', params.classGrade);
 
     const res = await fetch(`${API_BASE}/subjects?${query.toString()}`);
-    const data = await res.json();
+    const data = await safeJson(res);
     return data.success ? data.data : [];
   } catch (error) {
     console.error('Error fetching subjects:', error);
@@ -126,7 +138,7 @@ export async function createSubject(subjectData) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(subjectData),
     });
-    return await res.json();
+    return await safeJson(res);
   } catch (error) {
     console.error('Error creating subject:', error);
     return { success: false, message: error.message };
@@ -141,7 +153,7 @@ export async function getMarks(params = {}) {
     if (params.studentId) query.append('studentId', params.studentId);
 
     const res = await fetch(`${API_BASE}/marks?${query.toString()}`);
-    const data = await res.json();
+    const data = await safeJson(res);
     return data.success ? data.data : [];
   } catch (error) {
     console.error('Error fetching marks:', error);
@@ -156,7 +168,7 @@ export async function saveMarks(marksData) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(marksData),
     });
-    return await res.json();
+    return await safeJson(res);
   } catch (error) {
     console.error('Error saving marks:', error);
     return { success: false, message: error.message };
@@ -170,7 +182,7 @@ export async function saveBatchMarks(batchData) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(batchData),
     });
-    return await res.json();
+    return await safeJson(res);
   } catch (error) {
     console.error('Error saving batch marks:', error);
     return { success: false, message: error.message };
@@ -185,7 +197,7 @@ export async function getAttendance(params = {}) {
     if (params.section) query.append('section', params.section);
 
     const res = await fetch(`${API_BASE}/attendance?${query.toString()}`);
-    const data = await res.json();
+    const data = await safeJson(res);
     return data.success ? data.data : null;
   } catch (error) {
     console.error('Error fetching attendance:', error);
@@ -200,7 +212,7 @@ export async function saveAttendance(attendanceData) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(attendanceData),
     });
-    return await res.json();
+    return await safeJson(res);
   } catch (error) {
     console.error('Error saving attendance:', error);
     return { success: false, message: error.message };

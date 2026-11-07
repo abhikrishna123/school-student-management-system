@@ -3,7 +3,8 @@ import { X, Database, CheckCircle2, AlertCircle, RefreshCw, Key, Server } from '
 import { connectMongo } from '../api';
 
 export default function DbConnectModal({ isOpen, onClose, dbStatus, onConnected }) {
-  const [mongoUri, setMongoUri] = useState(dbStatus?.mongoUri || 'mongodb://localhost:27017/school_db');
+  const defaultUri = 'mongodb+srv://admin:admin123@cluster0.ueskciq.mongodb.net/school_db?retryWrites=true&w=majority';
+  const [mongoUri, setMongoUri] = useState(dbStatus?.mongoUri || defaultUri);
   const [connecting, setConnecting] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
@@ -41,7 +42,7 @@ export default function DbConnectModal({ isOpen, onClose, dbStatus, onConnected 
   };
 
   const handleUseAtlasTemplate = () => {
-    setMongoUri('mongodb+srv://<username>:<password>@cluster0.mongodb.net/school_db?retryWrites=true&w=majority');
+    setMongoUri('mongodb+srv://admin:admin123@cluster0.ueskciq.mongodb.net/school_db?retryWrites=true&w=majority');
   };
 
   return (
