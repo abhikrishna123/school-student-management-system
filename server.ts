@@ -9,8 +9,8 @@ import fs from 'fs';
 // Load environment variables from .env
 dotenv.config();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const currentFilename = typeof import.meta?.url === 'string' ? fileURLToPath(import.meta.url) : '';
+const currentDirname = typeof __dirname !== 'undefined' ? __dirname : (currentFilename ? path.dirname(currentFilename) : process.cwd());
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -1157,7 +1157,7 @@ All the best for your internal mark evaluation! 🚀
 async function startServer() {
   const isProd = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
   if (isProd) {
-    const distPath = path.join(__dirname, 'dist');
+    const distPath = path.join(currentDirname, 'dist');
     app.use(express.static(distPath));
     app.get('*', (_req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
